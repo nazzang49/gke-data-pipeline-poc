@@ -1,0 +1,29 @@
+{{- range .Values.components }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}
+    spec:
+      containers:
+        - name: {{ .name }}
+          image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - "/opt/druid/bin/start-druid {{ .name }}"
+          ports:
+            - containerPort: {{ .port }}
+          envFrom:
+            - configMapRef:
+                name: druid-config
+{{- end }}

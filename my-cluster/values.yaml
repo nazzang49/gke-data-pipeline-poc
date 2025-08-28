@@ -1,0 +1,38 @@
+# Common
+replicaCount: 3
+image:
+  repository: apache/druid
+  tag: "34.0.0"
+  pullPolicy: IfNotPresent
+
+# Apache Druid
+# 리소스 동적 생성 (service.yaml 바인딩)
+components:
+  - name: coordinator
+    port: 8081
+  - name: broker
+    port: 8082
+  - name: historical
+    port: 8083
+  - name: middlemanager
+    port: 8091
+  - name: router # 외부 접근 가능한 웹 콘솔
+    port: 8888
+    service:
+      type: NodePort
+      nodePort: 30888
+
+# 환경 변수 생성 (configmap.yaml 바인딩)
+config:
+  druid_zk_service_host: "zookeeper-service"      # K8S 내부 Zookeeper 서비스 주소
+  druid_metadata_storage_host: "postgres-service" # K8S 내부 PostgreSQL 서비스 주소
+  druid_metadata_storage_user: "druid"
+  druid_metadata_storage_password: "druid"
+
+# Spark App
+sparkApp:
+  image:
+    repository: apache/spark-py
+    tag: "v3.4.0"
+  command: >
+    bash -c "chmod 644 /opt/spark-app/stream_metrics.py && /opt/spark/bin/spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.0 --conf spark.sql.streaming.checkpointLocation=/opt/spark-checkpoints --conf spark.driver.host=spark-app --conf spark.driver.bindAddress=0.0.0.0 /opt/spark-app/stream_metrics.py"

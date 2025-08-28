@@ -1,0 +1,17 @@
+{{- range .Values.components }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}-service
+spec:
+  type: {{ .service.type | default "ClusterIP" }} # 지정된 IP 없을 시 ClusterIP 사용
+  ports:
+    - port: {{ .port }}
+      targetPort: {{ .port }}
+      {{- if eq .service.type "NodePort" }}
+      nodePort: {{ .service.nodePort }}
+      {{- end }}
+  selector:
+    app: {{ .name }}
+{{- end }}
