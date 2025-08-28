@@ -1,0 +1,17 @@
+apiVersion: v2
+name: druid-pipeline
+description: A Helm chart for deploying a Kafka-Spark-Druid pipeline on Kubernetes.
+type: application
+version: 0.1.0
+appVersion: "34.0.0" # Apache Druid Version
+
+dependencies:
+  - name: postgresql
+    version: "14.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled
+
+  - name: kafka
+    version: "26.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: kafka.enabled

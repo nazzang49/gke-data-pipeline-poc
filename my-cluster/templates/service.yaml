@@ -5,11 +5,12 @@ kind: Service
 metadata:
   name: {{ .name }}-service
 spec:
-  type: {{ .service.type | default "ClusterIP" }} # 지정된 IP 없을 시 ClusterIP 사용
+  type: {{ if and .service .service.type }}{{ .service.type }}{{ else }}ClusterIP{{ end }}
   ports:
     - port: {{ .port }}
       targetPort: {{ .port }}
-      {{- if eq .service.type "NodePort" }}
+      {{- /* .service 객체가 존재하고, type이 NodePort이며, nodePort 값이 있을 때만 nodePort를 추가합니다. */}}
+      {{- if and .service (eq .service.type "NodePort") .service.nodePort }}
       nodePort: {{ .service.nodePort }}
       {{- end }}
   selector:
